@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="My Day">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#BBA7F0">
+<title>My Day</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=DM+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#FBF7FB;--card:#fff;--ink:#3A3550;--mute:#847E9B;--line:#EDE7F3;--accent:#BBA7F0;--accent-ink:#2B2450;--chip-ink:#3A3550;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1D1A28;--card:#292536;--ink:#EEE9F8;--mute:#A8A1BF;--line:#383348;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1D1A28;--card:#292536;--ink:#EEE9F8;--mute:#A8A1BF;--line:#383348;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "DM Sans",system-ui,-apple-system,sans-serif}
+#app{max-width:520px;margin:0 auto;padding:22px 18px 120px}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+h1{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:34px;line-height:1.1;margin:0}
+.sub{color:var(--mute);margin:4px 0 0}
+.tabs{display:flex;background:var(--line);border-radius:14px;padding:4px;margin:18px 0 14px}
+.tabs button{flex:1;padding:9px;border-radius:11px;font-weight:500;color:var(--mute)}
+.tabs button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(90,70,140,.12)}
+.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.nav button{width:42px;height:42px;border-radius:50%;background:var(--card);font-size:20px}
+.nav .today{width:auto;padding:0 16px;font-size:15px;font-weight:500}
+.prog{height:6px;border-radius:3px;background:var(--line);margin:2px 0 16px;overflow:hidden}
+.prog i{display:block;height:100%;background:#A8D8C0;border-radius:3px;transition:width .3s}
+.task{display:flex;gap:12px;align-items:center;background:var(--card);border-radius:16px;padding:13px 14px;margin-bottom:9px;border-left:5px solid var(--p);cursor:pointer}
+.cb{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--mute);display:grid;place-items:center;font-size:15px;color:var(--accent-ink)}
+.done .cb{background:#A8D8C0;border-color:#A8D8C0}
+.done .tt{text-decoration:line-through;color:var(--mute)}
+.tt{font-weight:500;word-break:break-word}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--mute);margin-top:3px}
+.chip{background:var(--c,#ddd);color:var(--chip-ink);border-radius:20px;padding:1px 9px;font-size:12px;font-weight:500}
+.empty{text-align:center;color:var(--mute);padding:36px 10px}
+.dh{display:flex;justify-content:space-between;align-items:baseline;margin:18px 2px 8px;font-family:Fraunces,Georgia,serif;font-size:19px}
+.dh small{font:400 13px "DM Sans",sans-serif;color:var(--mute)}
+.dh.now{color:#9479E0}
+.free{color:var(--mute);font-size:14px;margin:0 2px 8px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.wd{text-align:center;color:var(--mute);font-size:13px;padding:4px 0}
+.cell{aspect-ratio:1/1.1;border-radius:14px;background:var(--card);display:flex;flex-direction:column;align-items:center;padding-top:7px;gap:4px;font-weight:500}
+.cell.blank{background:none}
+.cell.today{background:var(--accent);color:var(--accent-ink)}
+.dots{display:flex;gap:3px}.dots i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.fab{position:fixed;right:20px;bottom:calc(22px + env(safe-area-inset-bottom,0px));width:60px;height:60px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:32px;box-shadow:0 8px 22px rgba(120,90,200,.35)}
+#scrim{position:fixed;inset:0;background:rgba(40,30,70,.4);opacity:0;pointer-events:none;transition:opacity .2s}
+#sheet{position:fixed;left:0;right:0;bottom:0;max-width:520px;margin:0 auto;background:var(--card);border-radius:26px 26px 0 0;padding:20px 18px calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .28s;max-height:92%;overflow-y:auto}
+body.open #sheet{transform:none}body.open #scrim{opacity:1;pointer-events:auto}
+#sheet h2{font-family:Fraunces,Georgia,serif;margin:0 0 12px;font-size:24px}
+label{display:block;font-size:14px;color:var(--mute);margin:14px 0 6px}
+input[type=text],input[type=date],input[type=time]{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;min-height:46px}
+.row2{display:flex;gap:10px}.row2>div{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.opt{padding:8px 14px;border-radius:20px;background:var(--bg);border:1.5px solid var(--line);font-size:15px}
+.opt.on{background:var(--c,var(--accent));border-color:var(--c,var(--accent));color:var(--chip-ink);font-weight:600}
+.btns{display:flex;gap:10px;margin-top:22px}
+.btns button{flex:1;padding:14px;border-radius:14px;font-weight:600}
+.save{background:var(--accent);color:var(--accent-ink)}
+.del{background:var(--bg);color:#D5667E;flex:.6!important}
+.err{color:#D5667E;font-size:14px;margin-top:8px;min-height:18px}
+button:focus-visible,input:focus-visible{outline:3px solid #9479E0;outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="app">
+  <h1 id="title"></h1><p class="sub" id="sub"></p>
+  <div class="tabs" id="tabs">
+    <button data-act="view" data-v="day">Day</button><button data-act="view" data-v="week">Week</button><button data-act="view" data-v="month">Month</button>
+  </div>
+  <div class="nav"><button data-act="prev" aria-label="Previous">‹</button><button class="today" data-act="today">Today</button><button data-act="next" aria-label="Next">›</button></div>
+  <div id="main"></div>
+</div>
+<button class="fab" data-act="add" aria-label="Add task">+</button>
+<div id="scrim" data-act="close"></div>
+<div id="sheet" role="dialog" aria-label="Task"></div>
+<script>
+const K='myday.v1';
+const CATS={Personal:'#D9C7F5',Work:'#BFDDF5',Home:'#FFD9C7',Health:'#BFE6D3',Errands:'#FBE9B0'};
+const PRI={high:'#F2A0B0',med:'#F7C98B',low:'#A8D8C0'};
+const PL={high:'High',med:'Medium',low:'Low'};
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
+const addDays=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return ymd(d)};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtT=t=>new Date('1970-01-01T'+t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+const fmtD=(s,o)=>parse(s).toLocaleDateString([],o);
+const todayS=()=>ymd(new Date());
+let tasks=load(),view='day',cur=todayS(),editing=null,f={},armed=false;
+
+function load(){
+  try{const r=localStorage.getItem(K);if(r)return JSON.parse(r);}catch(e){}
+  const t=todayS();
+  return [
+    {id:'a1',title:'Morning stretch',date:t,time:'07:30',pri:'low',cat:'Health',repeat:'daily',done:false,doneOn:[]},
+    {id:'a2',title:'Plan my week',date:t,time:'',pri:'high',cat:'Personal',repeat:'none',done:false,doneOn:[]},
+    {id:'a3',title:'Water the plants',date:t,time:'',pri:'med',cat:'Home',repeat:'weekly',done:false,doneOn:[]}];
+}
+function save(){try{localStorage.setItem(K,JSON.stringify(tasks));}catch(e){}}
+function occurs(t,d){
+  if(t.repeat==='none')return t.date===d;
+  if(d<t.date)return false;
+  return t.repeat==='daily'||parse(d).getDay()===parse(t.date).getDay();
+}
+const isDone=(t,d)=>t.repeat==='none'?t.done:(t.doneOn||[]).includes(d);
+function forDay(d){
+  const o={high:0,med:1,low:2};
+  return tasks.filter(t=>occurs(t,d)).sort((a,b)=>
+    (isDone(a,d)-isDone(b,d))||((a.time||'99')<(b.time||'99')?-1:(a.time||'99')>(b.time||'99')?1:0)||(o[a.pri]-o[b.pri]));
+}
+function row(t,d){
+  const dn=isDone(t,d);
+  return `<div class="task ${dn?'done':''}" style="--p:${PRI[t.pri]}" data-act="edit" data-id="${t.id}">
+  <button class="cb" data-act="tog" data-id="${t.id}" data-d="${d}" aria-label="Mark done" aria-pressed="${dn}">${dn?'✓':''}</button>
+  <div><div class="tt">${esc(t.title)}</div><div class="meta">${t.time?fmtT(t.time):''}<span class="chip" style="--c:${CATS[t.cat]}">${t.cat}</span>${t.repeat!=='none'?'<span>↻ '+t.repeat+'</span>':''}</div></div></div>`;
+}
+function dayV(){
+  const l=forDay(cur),n=l.filter(t=>isDone(t,cur)).length;
+  if(!l.length)return '<div class="empty">Nothing planned for this day.<br>Tap + to add something.</div>';
+  return `<div class="prog"><i style="width:${n/l.length*100}%"></i></div><p class="sub" style="margin:-8px 0 12px">${n} of ${l.length} done</p>`+l.map(t=>row(t,cur)).join('');
+}
+function weekStart(s){const d=parse(s);return addDays(s,-((d.getDay()+6)%7));}
+function weekV(){
+  const w=weekStart(cur);let h='';
+  for(let i=0;i<7;i++){
+    const d=addDays(w,i),l=forDay(d);
+    h+=`<div class="dh ${d===todayS()?'now':''}" data-act="go" data-d="${d}"><span>${fmtD(d,{weekday:'long'})}</span><small>${fmtD(d,{day:'numeric',month:'short'})}</small></div>`;
+    h+=l.length?l.map(t=>row(t,d)).join(''):'<p class="free">Free day</p>';
+  }
+  return h;
+}
+function monthV(){
+  const d=parse(cur),y=d.getFullYear(),m=d.getMonth(),first=new Date(y,m,1),lead=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();
+  let h='<div class="grid">'+['M','T','W','T','F','S','S'].map(x=>`<div class="wd">${x}</div>`).join('');
+  for(let i=0;i<lead;i++)h+='<div class="cell blank"></div>';
+  for(let i=1;i<=days;i++){
+    const s=y+'-'+pad(m+1)+'-'+pad(i),l=forDay(s).filter(t=>!isDone(t,s)).slice(0,3);
+    h+=`<button class="cell ${s===todayS()?'today':''}" data-act="go" data-d="${s}">${i}<span class="dots">${l.map(t=>`<i style="--c:${CATS[t.cat]}"></i>`).join('')}</span></button>`;
+  }
+  return h+'</div><p class="free" style="margin-top:14px">Tap a day to see its tasks.</p>';
+}
+function render(){
+  const d=parse(cur);
+  if(view==='day'){$('#title').textContent=cur===todayS()?'Today':fmtD(cur,{weekday:'long'});$('#sub').textContent=fmtD(cur,{day:'numeric',month:'long',year:'numeric'});}
+  else if(view==='week'){const w=weekStart(cur);$('#title').textContent='This week'.replace('This week',weekStart(todayS())===w?'This week':'Week');$('#sub').textContent=fmtD(w,{day:'numeric',month:'short'})+' – '+fmtD(addDays(w,6),{day:'numeric',month:'short'});}
+  else{$('#title').textContent=fmtD(cur,{month:'long'});$('#sub').textContent=d.getFullYear();}
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===view));
+  $('#main').innerHTML=view==='day'?dayV():view==='week'?weekV():monthV();
+}
+function step(n){
+  if(view==='month'){const d=parse(cur);d.setDate(1);d.setMonth(d.getMonth()+n);cur=ymd(d);}
+  else cur=addDays(cur,view==='week'?7*n:n);
+  render();
+}
+function chips(k,opts){return '<div class="chips">'+opts.map(([v,l,c])=>`<button class="opt ${f[k]===v?'on':''}" ${c?`style="--c:${c}"`:''} data-act="pick" data-k="${k}" data-v="${v}">${l}</button>`).join('')+'</div>';}
+function sheet(id){
+  const t=tasks.find(x=>x.id===id);editing=t?id:null;armed=false;
+  f=t?{...t}:{title:'',date:cur,time:'',pri:'med',cat:'Personal',repeat:'none'};
+  drawSheet();document.body.classList.add('open');
+}
+function drawSheet(){
+  $('#sheet').innerHTML=`<h2>${editing?'Edit task':'New task'}</h2>
+  <label for="ti">What needs doing?</label><input type="text" id="ti" data-f="title" value="${esc(f.title)}" placeholder="e.g. Call the dentist" autocomplete="off">
+  <div class="row2"><div><label for="da">Date</label><input type="date" id="da" data-f="date" value="${f.date}"></div>
+  <div><label for="tm">Time (optional)</label><input type="time" id="tm" data-f="time" value="${f.time}"></div></div>
+  <label>Priority</label>${chips('pri',Object.keys(PL).map(k=>[k,PL[k],PRI[k]]))}
+  <label>Category</label>${chips('cat',Object.keys(CATS).map(k=>[k,k,CATS[k]]))}
+  <label>Repeat</label>${chips('repeat',[['none','Never'],['daily','Every day'],['weekly','Every week']])}
+  <div class="err" id="err"></div>
+  <div class="btns">${editing?`<button class="del" data-act="del">${armed?'Tap again':'Delete'}</button>`:''}<button class="save" data-act="save">Save task</button></div>`;
+}
+function closeSheet(){document.body.classList.remove('open');}
+document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.f;if(k)f[k]=e.target.value;});
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');if(!el)return;
+  const a=el.dataset.act,id=el.dataset.id;
+  if(a==='view'){view=el.dataset.v;render();}
+  else if(a==='prev')step(-1);else if(a==='next')step(1);
+  else if(a==='today'){cur=todayS();render();}
+  else if(a==='go'){cur=el.dataset.d;view='day';render();}
+  else if(a==='add')sheet(null);
+  else if(a==='edit')sheet(id);
+  else if(a==='close')closeSheet();
+  else if(a==='pick'){f[el.dataset.k]=el.dataset.v;drawSheet();}
+  else if(a==='tog'){
+    const t=tasks.find(x=>x.id===id),d=el.dataset.d;
+    if(t.repeat==='none')t.done=!t.done;
+    else{t.doneOn=t.doneOn||[];const i=t.doneOn.indexOf(d);i>=0?t.doneOn.splice(i,1):t.doneOn.push(d);}
+    save();render();
+  }
+  else if(a==='save'){
+    if(!f.title.trim()){$('#err').textContent='Give your task a name to save it.';return;}
+    if(!f.date)f.date=todayS();
+    f.title=f.title.trim();
+    if(editing){const i=tasks.findIndex(x=>x.id===editing);tasks[i]={...tasks[i],...f};}
+    else tasks.push({...f,id:Date.now().toString(36),done:false,doneOn:[]});
+    cur=f.date;save();closeSheet();render();
+  }
+  else if(a==='del'){
+    if(!armed){armed=true;drawSheet();$('#err').textContent=f.repeat!=='none'?'This removes every repeat of this task.':'';return;}
+    tasks=tasks.filter(x=>x.id!==editing);save();closeSheet();render();
+  }
+});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+render();
+</script>
+</body>
+</html>
